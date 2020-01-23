@@ -132,3 +132,4 @@ dmypy.json
 .idea/modules.xml
 .idea/vcs.xml
 /data/
+/my_submission.csv
