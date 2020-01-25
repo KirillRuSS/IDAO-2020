@@ -1,0 +1,7 @@
+{
+    "test_path": "",
+    "train_path": "",
+    "submission_csv": "",
+    "test_size": null,
+    "batch_size": null
+}
