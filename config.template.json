@@ -1,4 +1,5 @@
 {
+    "dataset_dir": "",
     "test_path": "",
     "train_path": "",
     "submission_csv": "",

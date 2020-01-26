@@ -8,8 +8,8 @@ def smape(satellite_predicted_values: np.array, satellite_true_values: np.array)
     :param satellite_true_values: истинное значение
     :return: величина ошибки
     """
-    return np.mean(np.abs((satellite_predicted_values - satellite_true_values)
-                          / (np.abs(satellite_predicted_values) + np.abs(satellite_true_values))))
+    return float(np.mean(np.abs((satellite_predicted_values - satellite_true_values)
+                                / (np.abs(satellite_predicted_values) + np.abs(satellite_true_values)))))
 
 
 def score(satellite_predicted_values: np.array, satellite_true_values: np.array) -> float:
