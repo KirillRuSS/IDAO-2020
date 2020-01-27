@@ -8,7 +8,8 @@ def remove_excess_points(df: pd.datetime) -> pd.datetime:
     :param df: исходная таблица точек
     :return: таблица точек без лишних точек и смещенными симулированными параметрами
     """
-    df['total_seconds'] = df.epoch.map(lambda x: (datetime.strptime(x, '%Y-%m-%dT%H:%M:%S.%f') - datetime(2014, 1, 1)).total_seconds())
+    df['epoch'] = df.epoch.map(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%S.%f'))
+    df['total_seconds'] = df.epoch.map(lambda x: (x - datetime(2014, 1, 1)).total_seconds())
     df['delta_time'] = 0
 
     drop_list = []

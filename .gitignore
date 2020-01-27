@@ -134,3 +134,5 @@ dmypy.json
 /data/
 /data/my_submission.csv
 /config.json
+/.idea/
+.idea/
