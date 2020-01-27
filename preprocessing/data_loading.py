@@ -9,26 +9,22 @@ import config as c
 
 
 def load_train_dataframe():
-    df = None
-
-    if os.path.isfile(c.DATASET_DIR + 'cor_' + c.TRAIN_PATH):
-        df = pd.read_csv(c.DATASET_DIR + 'cor_' + c.TRAIN_PATH)
+    if os.path.isfile(c.DATASET_DIR + 'cor_' + c.TRAIN_CSV):
+        df = pd.read_csv(c.DATASET_DIR + 'cor_' + c.TRAIN_CSV)
     else:
-        df = pd.read_csv(c.TRAIN_PATH)
-        epr.remove_excess_points(df)
-        df.to_csv(c.DATASET_DIR + 'cor_' + c.TRAIN_PATH, index=False, sep=',')
+        df = pd.read_csv(c.DATASET_DIR + c.TRAIN_CSV)
+        df = epr.remove_excess_points(df)
+        df.to_csv(c.DATASET_DIR + 'cor_' + c.TRAIN_CSV, index=False, sep=',')
 
     return df
 
 
 def load_test_dataframe():
-    df = None
-
-    if os.path.isfile(c.DATASET_DIR + 'cor_' + c.TEST_PATH):
-        df = pd.read_csv(c.DATASET_DIR + 'cor_' + c.TEST_PATH)
+    if os.path.isfile(c.DATASET_DIR + 'cor_' + c.TEST_CSV):
+        df = pd.read_csv(c.DATASET_DIR + 'cor_' + c.TEST_CSV)
     else:
-        df = pd.read_csv(c.TEST_PATH)
-        epr.remove_excess_points(df)
-        df.to_csv(c.DATASET_DIR + 'cor_' + c.TEST_PATH, index=False, sep=',')
+        df = pd.read_csv(c.DATASET_DIR + c.TEST_CSV)
+        df = epr.remove_excess_points(df)
+        df.to_csv(c.DATASET_DIR + 'cor_' + c.TEST_CSV, index=False, sep=',')
 
     return df
