@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime, date, time
 
 
-def remove_excess_points(df: pd.datetime) -> pd.datetime:
+def remove_excess_points(df: pd.DataFrame) -> pd.DataFrame:
     """
     Скрипт преднозначен для удаления лишних точек, которые присутствуют в исходных данных, и появились вероятно в результате некорректной склейки данных
     :param df: исходная таблица точек

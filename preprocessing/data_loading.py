@@ -1,11 +1,9 @@
 import os.path
-import numpy as np
 import pandas as pd
-from datetime import datetime, date, time
-
-import preprocessing.extra_points_removing as epr
 
 import config as c
+import utils.physical_utils as physical_utils
+import preprocessing.extra_points_removing as epr
 
 
 def load_train_dataframe():
@@ -14,6 +12,7 @@ def load_train_dataframe():
     else:
         df = pd.read_csv(c.DATASET_DIR + c.TRAIN_CSV)
         df = epr.remove_excess_points(df)
+        df = physical_utils.add_orbit_elements_to_df(df)
         df.to_csv(c.DATASET_DIR + 'cor_' + c.TRAIN_CSV, index=False, sep=',')
 
     return df
