@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from datetime import datetime, date, time
 
@@ -56,5 +57,17 @@ def remove_outlies(df: pd.DataFrame) -> pd.DataFrame:
     for index in df[outlies].index:
         df.at[index, ['a', 'ecc', 'inc', 'raan', 'argp']] = (df.iloc[index - 1][['a', 'ecc', 'inc', 'raan', 'argp']] +
                                                              df.iloc[index + 1][['a', 'ecc', 'inc', 'raan', 'argp']]) / 2
+
+    return df
+
+
+def arg_decomposition_into_sin_cos(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Разложение аргумента на sin и cos
+    :param df: исходная таблица
+    :return: таблица c sin и cos аргумента
+    """
+    df['sin_argp'] = np.sin(df['argp'])
+    df['cos_argp'] = np.cos(df['argp'])
 
     return df
