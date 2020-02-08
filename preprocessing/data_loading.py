@@ -12,6 +12,7 @@ def load_train_dataframe():
     else:
         df = pd.read_csv(c.DATASET_DIR + c.TRAIN_CSV)
         df = epr.remove_excess_points(df)
+        df = epr.remove_outlies(df)
         df = physical_utils.add_orbit_elements_to_df(df)
         df.to_csv(c.DATASET_DIR + 'cor_' + c.TRAIN_CSV, index=False, sep=',')
 

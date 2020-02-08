@@ -37,3 +37,24 @@ def remove_excess_points(df: pd.DataFrame) -> pd.DataFrame:
         df[df['sat_id'] == sat_id] = sat
 
     return df.drop(drop_list)
+
+
+def remove_outlies(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Скрипт преднозначен для удаления выбросов в данных
+    :param df: исходная таблица точек
+    :return: таблица точек без выбросов
+    """
+    mean_ecc = df['ecc'].rolling(window=24, center=True).sum() / 24
+    ecc_deviation = abs(mean_ecc - df['ecc'])
+
+    k = 2
+    outlies = ecc_deviation > df['ecc'].rolling(window=24, center=True).std() * 3
+    outlies &= (ecc_deviation.shift(24) / ecc_deviation > k) | (ecc_deviation.shift(24) / ecc_deviation < 1 / k)
+    outlies &= df['sat_id'].astype('float64') == (df['sat_id'].rolling(window=24, center=True).sum() / 24)
+
+    for index in df[outlies].index:
+        df.at[index, ['a', 'ecc', 'inc', 'raan', 'argp']] = (df.iloc[index - 1][['a', 'ecc', 'inc', 'raan', 'argp']] +
+                                                             df.iloc[index + 1][['a', 'ecc', 'inc', 'raan', 'argp']]) / 2
+
+    return df
