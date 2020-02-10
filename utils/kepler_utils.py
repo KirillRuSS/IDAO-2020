@@ -1,6 +1,9 @@
 import numba
 import numpy as np
+from numpy import arctan, cos, degrees, sin, sqrt
+
 from utils.stumpff import c2, c3
+from utils.utilities import orbit_radius, elements_from_state_vector
 
 
 def kepler_numba(r0, v0, tof, k=398600.44180000003, numiter=35, rtol=1e-10):
@@ -49,8 +52,78 @@ def kepler_numba(r0, v0, tof, k=398600.44180000003, numiter=35, rtol=1e-10):
     r = f * r0 + g * v0
     v = fdot * r0 + gdot * v0
 
-
     return np.concatenate((r, v), axis=0)
+
+
+"""
+- Большая полуось - a.
+- Эксцентриситет - e.
+- Наклонение - i.
+- Долгота восходящего узла - raan.
+- Аргумент перицентра - arg_pe.
+- Истинная аномалия - f.
+"""
+
+
+def V_from_elements(i, raan, arg_pe, f):
+    """Transversal in-flight direction unit vector."""
+    u = arg_pe + f
+
+    sin_u = sin(u)
+    cos_u = cos(u)
+    sin_raan = sin(raan)
+    cos_raan = cos(raan)
+    cos_i = cos(i)
+
+    return np.array(
+        [-sin_u * cos_raan - cos_u * sin_raan * cos_i,
+         -sin_u * sin_raan + cos_u * cos_raan * cos_i,
+         cos_u * sin(i)]
+    )
+
+
+def U_from_elements(i, raan, arg_pe, f):
+    """Radial direction unit vector."""
+    u = arg_pe + f
+
+    sin_u = sin(u)
+    cos_u = cos(u)
+    sin_raan = sin(raan)
+    cos_raan = cos(raan)
+    cos_i = cos(i)
+
+    return np.array(
+        [cos_u * cos_raan - sin_u * sin_raan * cos_i,
+         cos_u * sin_raan + sin_u * cos_raan * cos_i,
+         sin_u * sin(i)]
+    )
+
+
+def rv_from_elements(a, e, i, raan, arg_pe, f, mu=398600.44180000003):
+    r = orbit_radius(a, e, f) * U_from_elements(i, raan, arg_pe, f)
+
+    r_dot = sqrt(mu / a) * (e * sin(f)) / sqrt(1 - e ** 2)
+    rf_dot = sqrt(mu / a) * (1 + e * cos(f)) / sqrt(1 - e ** 2)
+    v = r_dot * U_from_elements(i, raan, arg_pe, f) + rf_dot * V_from_elements(i, raan, arg_pe, f)
+
+    return r, v
+
+
+def rv_from_elements_np(orbital_elements: np.array, mu=398600.44180000003):
+    a = orbital_elements[0]
+    e = orbital_elements[1]
+    i = orbital_elements[2]
+    raan = orbital_elements[3]
+    arg_pe = orbital_elements[4]
+    f = orbital_elements[5]
+
+    r = orbit_radius(a, e, f) * U_from_elements(i, raan, arg_pe, f)
+
+    r_dot = sqrt(mu / a) * (e * sin(f)) / sqrt(1 - e ** 2)
+    rf_dot = sqrt(mu / a) * (1 + e * cos(f)) / sqrt(1 - e ** 2)
+    v = r_dot * U_from_elements(i, raan, arg_pe, f) + rf_dot * V_from_elements(i, raan, arg_pe, f)
+
+    return r, v
 
 
 @numba.njit('f8(f8[:], f8[:])')
@@ -68,7 +141,6 @@ def _kepler(k, r0, v0, tof, numiter, rtol):
     norm_r0 = dot(r0, r0) ** .5
     sqrt_mu = k ** .5
     alpha = -dot(v0, v0) / k + 2 / norm_r0
-
 
     # First guess
     if alpha > 0:
@@ -102,6 +174,5 @@ def _kepler(k, r0, v0, tof, numiter, rtol):
 
     gdot = 1 - xi ** 2 / norm_r * c2_psi
     fdot = sqrt_mu / (norm_r * norm_r0) * xi * (psi * c3_psi - 1)
-
 
     return f, g, fdot, gdot
