@@ -49,6 +49,7 @@ def kepler_numba(r0, v0, tof, k=398600.44180000003, numiter=35, rtol=1e-10):
     r = f * r0 + g * v0
     v = fdot * r0 + gdot * v0
 
+
     return np.concatenate((r, v), axis=0)
 
 
@@ -67,6 +68,7 @@ def _kepler(k, r0, v0, tof, numiter, rtol):
     norm_r0 = dot(r0, r0) ** .5
     sqrt_mu = k ** .5
     alpha = -dot(v0, v0) / k + 2 / norm_r0
+
 
     # First guess
     if alpha > 0:
@@ -100,5 +102,6 @@ def _kepler(k, r0, v0, tof, numiter, rtol):
 
     gdot = 1 - xi ** 2 / norm_r * c2_psi
     fdot = sqrt_mu / (norm_r * norm_r0) * xi * (psi * c3_psi - 1)
+
 
     return f, g, fdot, gdot

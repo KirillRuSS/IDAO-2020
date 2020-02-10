@@ -29,11 +29,3 @@ quick_predictions = pd.DataFrame(np.concatenate(quick_predictions, axis=0), colu
 
 df_test[['x', 'y', 'z', 'Vx', 'Vy', 'Vz']]=quick_predictions
 df_test[["id", "x", "y", "z", "Vx", "Vy", "Vz"]].to_csv("submission.csv", index=False)
-"""
-test = pd.read_csv("test.csv")
-
-# just sending simulated values as the answer
-submission = test[["id", "x_sim", "y_sim", "z_sim", "Vx_sim", "Vy_sim", "Vz_sim"]]
-submission.columns = ["id", "x", "y", "z", "Vx", "Vy", "Vz"]
-submission.to_csv("submission.csv", index=False)
-"""
