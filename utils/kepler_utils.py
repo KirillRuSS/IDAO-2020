@@ -134,6 +134,7 @@ def dot(u, v):
     return dp
 
 
+
 @numba.njit
 def _kepler(k, r0, v0, tof, numiter, rtol):
     # Cache some results
@@ -176,3 +177,6 @@ def _kepler(k, r0, v0, tof, numiter, rtol):
     fdot = sqrt_mu / (norm_r * norm_r0) * xi * (psi * c3_psi - 1)
 
     return f, g, fdot, gdot
+
+
+kepler_numba(np.array([44298.80558587, 68556.16592447, 36861.3495609 ]), np.array([1.6146847,  0.78054169, 0.12487801]), 7655.71800000011)
