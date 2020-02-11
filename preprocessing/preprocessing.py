@@ -19,7 +19,7 @@ def get_sat_list(df: pd.DataFrame):
         d = sat['d']
 
         if max(d['argp']) > 6 * min(d['argp']) < 0.3:
-            d.loc[:, 'argp'] = d['argp'] + (d['argp'] < np.mean(d['argp'])) * np.pi * 2
+            d.loc[:, 'argp'] = d['argp'] + (d['argp'] < np.mean(d['raan'])) * np.pi * 2
 
         if max(d['raan']) > 6 * min(d['raan']) < 0.3:
             d.loc[:, 'raan'] = d['raan'] + (d['raan'] < np.mean(d['raan'])) * np.pi * 2
@@ -30,7 +30,6 @@ def get_sat_list(df: pd.DataFrame):
         sat['d'] = d
 
     # Усредняем параметры орбиты
-
     averaged_columns = ['a', 'ecc', 'inc', 'raan', 'argp']
     for sat_id in range(600):
         sat = sat_list[sat_id]
