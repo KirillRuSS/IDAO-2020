@@ -131,15 +131,4 @@ dmypy.json
 .idea/misc.xml
 .idea/modules.xml
 .idea/vcs.xml
-/data/
-/data/my_submission.csv
-/config.json
-/.idea/
-.idea/
-/pickle_data/
-/submission.csv
-/test.csv
-/train_tensorboard/
-/df.csv
-/test.zip
-/submission.zip
+

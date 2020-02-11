@@ -1,0 +1,8 @@
+{
+    "dataset_dir": "data/",
+    "test_csv": "test.csv",
+    "train_csv": "train.csv",
+    "submission_csv": "submission.csv",
+    "test_size": 0.2,
+    "batch_size": 8
+}
