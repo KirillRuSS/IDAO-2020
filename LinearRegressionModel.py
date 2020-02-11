@@ -54,15 +54,17 @@ class LinearRegressionModel:
 
         return positions
 
-    def predict(self, row, p):
-        if p[1] > 0.9:
-            return p
-        p = self.reg.predict([row])[0]
-        return np.append(p, 0)
+    def predict(self, row):
+        p = self.reg.predict(row)
+        b = np.zeros((len(p), 6))
+        b[:, :-1] = p
+
+        return b
+
 
     def predict_time(self, row):
         if self.delta_time_reg is not None:
-            return self.delta_time_reg.predict([row])[0]
+            return self.delta_time_reg.predict(row)
         else:
             return 0
 
@@ -90,22 +92,27 @@ class LinearRegressionModel:
         positions = []
         self.nu_list = []
 
-        _predict_time = self.predict_time(np.array([p_time, p_time ** 1.1]))
+        _predict_time = self.predict_time(np.array([[p_time, p_time ** 1.1]]))[0]
 
         X = self.get_x(d)
-        for x in X:
+        predict_time_array = self.predict_time(X)
+        predict_p_array = self.predict(X)
+
+        for i, x in enumerate(X):
             if self.is_dynamic_time:
-                rv, nu = get_next_rv_nu(p, x[0] - p_time + (self.predict_time(x) - _predict_time))
+                rv, nu = get_next_rv_nu(p, x[0] - p_time + (predict_time_array[i] - _predict_time))
             else:
                 rv, nu = get_next_rv_nu(p, x[0] - p_time)
 
-            _predict_time = self.predict_time(x)
+            _predict_time = predict_time_array[i]
             positions.append(rv)
             p_time = x[0]
             nu += p[-1]
 
             self.nu_list.append(nu)
-            p = self.predict(x, p)
+
+            if p[1] < 0.9:
+                p = predict_p_array[i]
             p[-1] = nu
         positions = np.array(positions)
 
@@ -114,8 +121,8 @@ class LinearRegressionModel:
     def get_quick_predictions(self, d, p, p_time):
         r1, v1 = rv_from_elements(p[0], p[1], p[2], p[3], p[4], p[5])
 
-        quick_prediction = np.array(d['total_seconds'].map(
-            lambda t: kepler_numba(r1, v1, t - p_time, numiter=100, rtol=1e-9)).to_list())
+        quick_prediction = np.array(list(d['total_seconds'].map(
+            lambda t: kepler_numba(r1, v1, t - p_time, numiter=100, rtol=1e-9))))
         return quick_prediction
 
     def set_p_and_p_time(self, p, p_time):
