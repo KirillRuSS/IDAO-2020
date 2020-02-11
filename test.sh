@@ -1,2 +1,2 @@
 export PATH=/usr/conda/bin:$PATH
-python test.py
+python main.py
