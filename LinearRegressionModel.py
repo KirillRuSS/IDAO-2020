@@ -18,6 +18,10 @@ class LinearRegressionModel:
         self.delta_time_reg = None
         self.is_dynamic_time = True
 
+        self.test_score = None
+        self.p = None
+        self.p_time = None
+
     def get_x(self, data):
         pd.options.mode.chained_assignment = None
         data.loc[:, 'total_seconds_square'] = data['total_seconds'] ** 1.1
@@ -79,7 +83,8 @@ class LinearRegressionModel:
 
         model_smape = metrics.smape(positions, d[c.real_columns].to_numpy())
 
-        return (1 - original_smape) * 100, (1 - model_smape) * 100, (original_smape / model_smape)
+        self.test_score = (original_smape - model_smape) * len(data)
+        return (1 - original_smape) * 100, (1 - model_smape) * 100, (original_smape - model_smape) * len(data)
 
     def step_by_step_predict(self, d, p, p_time):
         positions = []
@@ -106,19 +111,22 @@ class LinearRegressionModel:
 
         return positions
 
-    def get_quick_predictions(self, test_df, p, p_time):
-        quick_predictions = []
+    def get_quick_predictions(self, d, p, p_time):
+        r1, v1 = rv_from_elements(p[0], p[1], p[2], p[3], p[4], p[5])
 
-        for sat_id in test_df['sat_id'].unique():
-            r1, v1 = rv_from_elements(p[0], p[1], p[2], p[3], p[4], p[5])
+        quick_prediction = np.array(d['total_seconds'].map(
+            lambda t: kepler_numba(r1, v1, t - p_time, numiter=100, rtol=1e-9)).to_list())
+        return quick_prediction
 
-            sat = test_df[test_df['sat_id'] == sat_id]
+    def set_p_and_p_time(self, p, p_time):
+        self.p = p
+        self.p_time = p_time
 
-            quick_predictions.append(np.array(sat['total_seconds'].map(
-                lambda t: kepler_numba(r1, v1, t - p_time, numiter=100, rtol=1e-9)).to_list()))
-
-        quick_predictions = np.concatenate(quick_predictions, axis=0)
-        return quick_predictions
+    def predict_test_df(self, test_df, minimum_allowable_test_score):
+        if self.test_score >= minimum_allowable_test_score:
+            return self.step_by_step_predict(test_df, self.p, self.p_time)
+        else:
+            return self.get_quick_predictions(test_df, self.p, self.p_time)
 
 
 def save_models(model: [], name: str):
