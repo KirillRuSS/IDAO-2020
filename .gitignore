@@ -141,3 +141,5 @@ dmypy.json
 /test.csv
 /train_tensorboard/
 /df.csv
+/test.zip
+/submission.zip

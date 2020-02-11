@@ -12,3 +12,5 @@ BATCH_SIZE = __json.get('batch_size')
 
 SEED = 7
 mu = 398600.44180000003
+real_columns = ['x', 'y', 'z', 'Vx', 'Vy', 'Vz']
+sim_columns = ['x_sim', 'y_sim', 'z_sim', 'Vx_sim', 'Vy_sim', 'Vz_sim']

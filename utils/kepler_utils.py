@@ -2,6 +2,7 @@ import numba
 import numpy as np
 from numpy import arctan, cos, degrees, sin, sqrt
 
+from utils.math_utils import get_angle
 from utils.stumpff import c2, c3
 from utils.utilities import elements_from_state_vector
 
@@ -64,6 +65,7 @@ def kepler_numba(r0, v0, tof, k=398600.44180000003, numiter=35, rtol=1e-10):
 - Истинная аномалия - f.
 """
 
+
 @numba.njit
 def V_from_elements(i, raan, arg_pe, f):
     """Transversal in-flight direction unit vector."""
@@ -80,6 +82,7 @@ def V_from_elements(i, raan, arg_pe, f):
          -sin_u * sin_raan + cos_u * cos_raan * cos_i,
          cos_u * sin(i)]
     )
+
 
 @numba.njit
 def U_from_elements(i, raan, arg_pe, f):
@@ -115,6 +118,7 @@ def rv_from_elements(a, e, i, raan, arg_pe, f, mu=398600.44180000003):
 
     return r, v
 
+
 @numba.njit
 def rv_from_elements_np(orbital_elements: np.array, mu=398600.44180000003):
     a = orbital_elements[0]
@@ -139,7 +143,6 @@ def dot(u, v):
     for ii in range(u.shape[0]):
         dp += u[ii] * v[ii]
     return dp
-
 
 
 @numba.njit
@@ -185,7 +188,29 @@ def _kepler(k, r0, v0, tof, numiter, rtol):
 
     return f, g, fdot, gdot
 
-p = np.array([2.43685557e+04, 1.67864817e-01, 1.60000064e+00, 3.72245933e+00,
- 1.84636736e+00, 4.06058822e+02])
 
-rv_from_elements_np(p)
+def get_mean_anomaly(a, e, t0, t1):
+    bad_gap = (t1 > np.pi) * (t0 < np.pi)
+
+    b = a * np.sqrt(1 - e ** 2)
+
+    E0 = 2 * np.arctan(np.sqrt((1 - e) / (1 + e)) * np.tan(t0 / 2))
+    E1 = 2 * np.arctan(np.sqrt((1 - e) / (1 + e)) * np.tan(t1 / 2))
+
+    M0 = E0 - e * np.sin(E0)
+    M1 = E1 - e * np.sin(E1)
+    M2 = bad_gap * np.pi * 2
+
+    s = M1 - M0 + M2
+    return s
+
+
+def get_next_rv_nu(p, delta_time):
+    rv = rv_from_elements(p[0], p[1], p[2], p[3], p[4], p[5])
+    r0 = rv[0]
+
+    rv = kepler_numba(rv[0], rv[1], delta_time, numiter=100, rtol=1e-9)
+    r1 = rv[:3]
+
+    nu = get_angle(r0, r1)
+    return rv, nu

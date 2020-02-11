@@ -1,15 +1,27 @@
+import pickle
 import numpy as np
 import pandas as pd
 from datetime import datetime
 
 from utils.kepler_utils import kepler_numba
 
+import time
+t0 = time.time()
+print(time.time()-t0)
+
+a = ''
+with open('test.pkl', 'rb') as f:
+    a = pickle.load(f)
+if a != '1':
+    a = 0/0
+
 df_test = pd.read_csv("test.csv")
+
 df_test['epoch'] = df_test.epoch.map(lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%S.%f'))
 df_test['total_seconds'] = df_test.epoch.map(lambda x: (x - datetime(2014, 1, 1)).total_seconds())
 
-df = pd.read_csv("df.csv")
 
+df = pd.read_csv("df.csv")
 quick_predictions = []
 
 for sat_id in df_test['sat_id'].unique():
@@ -23,9 +35,7 @@ for sat_id in df_test['sat_id'].unique():
 
     quick_predictions.append(np.array(list(sat['total_seconds'].map(
         lambda t: kepler_numba(r1, v1, t - total_seconds, numiter=300, rtol=1e-9)))))
-
 quick_predictions = pd.DataFrame(np.concatenate(quick_predictions, axis=0), columns=['x', 'y', 'z', 'Vx', 'Vy', 'Vz'])
-
 
 df_test[['x', 'y', 'z', 'Vx', 'Vy', 'Vz']]=quick_predictions
 df_test[["id", "x", "y", "z", "Vx", "Vy", "Vz"]].to_csv("submission.csv", index=False)
