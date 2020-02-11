@@ -1,4 +1,7 @@
+import numba
 import numpy as np
+from numpy.linalg import norm
+from numpy import (array, dot, arccos, clip)
 
 
 def normalize(a, k):
@@ -17,3 +20,7 @@ def moving_average(a, n=3):
 def mean_without_k_outlies(a, k=2):
     a = np.delete(a, np.argmax(abs(a - np.mean(a))))
     return np.mean(a)
+
+
+def get_angle(r0: np.array, r1: np.array):
+    return np.arccos(clip(dot(r0, r1) / norm(r0) / norm(r1), -1, 1))
