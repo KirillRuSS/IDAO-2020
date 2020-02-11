@@ -66,7 +66,7 @@ class LinearRegressionModel:
         if self.delta_time_reg is not None:
             return self.delta_time_reg.predict(row)
         else:
-            return 0
+            return np.zeros(len(row))
 
     def test(self, data):
         border = len(data) // 2
@@ -86,7 +86,7 @@ class LinearRegressionModel:
         model_smape = metrics.smape(positions, d[c.real_columns].to_numpy())
 
         self.test_score = (original_smape - model_smape) * len(data)
-        return (1 - original_smape) * 100, (1 - model_smape) * 100, (original_smape - model_smape) * len(data)
+        return (1 - original_smape) * 100, (1 - model_smape) * 100, original_smape / model_smape
 
     def step_by_step_predict(self, d, p, p_time):
         positions = []
