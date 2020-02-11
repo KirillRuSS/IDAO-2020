@@ -1,3 +1,4 @@
+import pickle
 import config as c
 import numpy as np
 import pandas as pd
@@ -5,7 +6,7 @@ from numpy import sqrt
 from sklearn.linear_model import LinearRegression
 
 import utils.metrics as metrics
-from utils.kepler_utils import get_next_rv_nu, get_mean_anomaly
+from utils.kepler_utils import get_next_rv_nu, get_mean_anomaly, kepler_numba, rv_from_elements
 
 
 class LinearRegressionModel:
@@ -104,3 +105,27 @@ class LinearRegressionModel:
         positions = np.array(positions)
 
         return positions
+
+    def get_quick_predictions(self, test_df, p, p_time):
+        quick_predictions = []
+
+        for sat_id in test_df['sat_id'].unique():
+            r1, v1 = rv_from_elements(p[0], p[1], p[2], p[3], p[4], p[5])
+
+            sat = test_df[test_df['sat_id'] == sat_id]
+
+            quick_predictions.append(np.array(sat['total_seconds'].map(
+                lambda t: kepler_numba(r1, v1, t - p_time, numiter=100, rtol=1e-9)).to_list()))
+
+        quick_predictions = np.concatenate(quick_predictions, axis=0)
+        return quick_predictions
+
+
+def save_models(model: [], name: str):
+    with open('pickle_data/' + name + '.pkl', 'wb') as f:
+        pickle.dump(model, f)
+
+
+def load_models(name: str) -> []:
+    with open('pickle_data/' + name + '.pkl', 'rb') as f:
+        return pickle.load(f)

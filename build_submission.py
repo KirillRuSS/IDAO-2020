@@ -17,7 +17,8 @@ def main():
     file_paths = []
     file_paths += get_all_file_paths('utils')
     file_paths += get_all_file_paths('preprocessing')
-    file_paths += ['df.csv', 'Makefile', 'main.sh', 'main.py', 'LinearRegressionModel.py', 'config.json', 'config.py', 'test.pkl']
+    file_paths += get_all_file_paths('pickle_data')
+    file_paths += ['df.csv', 'Makefile', 'main.sh', 'main.py', 'LinearRegressionModel.py', 'config.json', 'config.py']
 
     for file_name in file_paths:
         print(file_name)
