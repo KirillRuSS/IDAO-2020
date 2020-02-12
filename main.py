@@ -23,7 +23,7 @@ predictions = []
 for sat_id in df_test['sat_id'].unique():
     d = df_test[df_test['sat_id'] == sat_id]
 
-    predictions.append(models[sat_id].predict_test_df(d, 0))
+    predictions.append(models[sat_id].predict_test_df(d, -10))
 print(time.time() - t0)
 predictions = np.concatenate(predictions, axis=0)
 
